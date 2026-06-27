@@ -34,14 +34,28 @@ const DEFAULT_CONTENT: WebsiteContentMap = {
 };
 
 const DEFAULT_IMAGES: WebsiteImageMap = {
-  logo: { url: "", alt: "ARÉTÉ" },
+  logo: { url: "", alt: "ARÉTÉ", urls: [] },
   banner_home: {
     url: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=2000",
     alt: "Koleksi ARÉTÉ",
+    urls: [
+      {
+        url: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=2000",
+        alt: "Koleksi ARÉTÉ",
+        sort_order: 0,
+      },
+    ],
   },
   about_image: {
     url: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=1400",
     alt: "Studio ARÉTÉ",
+    urls: [
+      {
+        url: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=1400",
+        alt: "Studio ARÉTÉ",
+        sort_order: 0,
+      },
+    ],
   },
 };
 
@@ -65,14 +79,25 @@ export async function getWebsiteImages(): Promise<WebsiteImageMap> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("website_images")
-    .select("slot, url, alt");
+    .select("slot, url, alt, urls");
 
   if (error || !data) return DEFAULT_IMAGES;
 
   const map: WebsiteImageMap = structuredClone(DEFAULT_IMAGES);
   for (const row of data) {
-    if (row.url) {
-      map[row.slot] = { url: row.url, alt: row.alt };
+    const hasMultiImages = Array.isArray(row.urls) && row.urls.length > 0;
+    if (hasMultiImages) {
+      map[row.slot] = {
+        url: row.urls[0].url,
+        alt: row.urls[0].alt ?? row.alt ?? "",
+        urls: row.urls,
+      };
+    } else if (row.url) {
+      map[row.slot] = {
+        url: row.url,
+        alt: row.alt ?? "",
+        urls: [{ url: row.url, alt: row.alt ?? "", sort_order: 0 }],
+      };
     }
   }
   return map;

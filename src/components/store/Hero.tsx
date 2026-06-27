@@ -3,17 +3,19 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowDown } from "lucide-react";
+import { ImageCarousel } from "@/components/store/ImageCarousel";
+import type { ProductImage } from "@/types/database";
 
 type HeroProps = {
   eyebrow: string;
   title: string;
   subtitle: string;
   ctaLabel: string;
-  bannerUrl: string;
+  bannerImages: ProductImage[];
   bannerAlt: string;
 };
 
-export function Hero({ eyebrow, title, subtitle, ctaLabel, bannerUrl, bannerAlt }: HeroProps) {
+export function Hero({ eyebrow, title, subtitle, ctaLabel, bannerImages, bannerAlt }: HeroProps) {
   return (
     <section className="relative flex h-[92vh] min-h-[640px] w-full items-end overflow-hidden bg-[var(--color-ink)]">
       <motion.div
@@ -22,8 +24,11 @@ export function Hero({ eyebrow, title, subtitle, ctaLabel, bannerUrl, bannerAlt 
         transition={{ duration: 1.6, ease: [0.22, 1, 0.36, 1] }}
         className="absolute inset-0"
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={bannerUrl} alt={bannerAlt} className="h-full w-full object-cover" />
+        <ImageCarousel
+          images={bannerImages}
+          fallbackAlt={bannerAlt}
+          className="absolute inset-0"
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-ink)] via-[var(--color-ink)]/20 to-[var(--color-ink)]/10" />
       </motion.div>
 

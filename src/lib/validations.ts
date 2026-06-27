@@ -70,3 +70,19 @@ export const checkoutSchema = z.object({
   }),
 });
 export type CheckoutInput = z.infer<typeof checkoutSchema>;
+
+export const collaborationSchema = z.object({
+  title: z.string().min(2, "Judul minimal 2 karakter"),
+  slug: z
+    .string()
+    .min(2)
+    .regex(/^[a-z0-9-]+$/, "Slug hanya boleh huruf kecil, angka, dan tanda hubung"),
+  description: z.string().default(""),
+  status: z.enum(["selesai", "coming_soon"]).default("selesai"),
+  is_for_sale: z.boolean().default(false),
+  product_id: z.string().uuid().nullable().optional(),
+  partner_name: z.string().nullable().optional(),
+  sort_order: z.coerce.number().int().default(0),
+  is_published: z.boolean().default(true),
+});
+export type CollaborationInput = z.infer<typeof collaborationSchema>;

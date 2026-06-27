@@ -14,6 +14,7 @@ type NavbarProps = {
 const NAV_LINKS = [
   { href: "/katalog", label: "Katalog" },
   { href: "/katalog?featured=true", label: "Unggulan" },
+  { href: "/kolaborasi", label: "Kolaborasi" },
 ];
 
 export function Navbar({ brandName, logoUrl }: NavbarProps) {

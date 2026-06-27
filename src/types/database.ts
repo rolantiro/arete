@@ -64,7 +64,30 @@ export type WebsiteImageRow = {
   slot: string;
   url: string;
   alt: string;
+  urls: ProductImage[];
   updated_at: string;
+};
+
+// =========================================================
+// Collaborations / showcase gallery
+// =========================================================
+export type CollaborationStatus = "selesai" | "coming_soon";
+
+export type Collaboration = {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  images: ProductImage[];
+  status: CollaborationStatus;
+  is_for_sale: boolean;
+  product_id: string | null;
+  partner_name: string | null;
+  sort_order: number;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+  product?: Product | null;
 };
 
 export type CartItem = {
@@ -148,4 +171,4 @@ export type Order = {
 // e.g. content.hero.title, content.footer.email
 // =========================================================
 export type WebsiteContentMap = Record<string, Record<string, string>>;
-export type WebsiteImageMap = Record<string, { url: string; alt: string }>;
+export type WebsiteImageMap = Record<string, { url: string; alt: string; urls: ProductImage[] }>;

@@ -30,7 +30,7 @@ export default async function HomePage() {
             "Pakaian premium untuk mereka yang memilih detail di atas kebisingan."
           }
           ctaLabel={content.hero?.cta_label || "Jelajahi Koleksi"}
-          bannerUrl={images.banner_home?.url}
+          bannerImages={images.banner_home?.urls ?? []}
           bannerAlt={images.banner_home?.alt || brandName}
         />
 
@@ -39,7 +39,7 @@ export default async function HomePage() {
         <About
           title={content.about?.title || "Filosofi Kami"}
           body={content.about?.body || ""}
-          imageUrl={images.about_image?.url}
+          images={images.about_image?.urls ?? []}
           imageAlt={images.about_image?.alt || brandName}
         />
       </main>

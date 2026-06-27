@@ -2,15 +2,17 @@
 
 import { motion } from "framer-motion";
 import { Container } from "@/components/ui/Container";
+import { ImageCarousel } from "@/components/store/ImageCarousel";
+import type { ProductImage } from "@/types/database";
 
 type AboutProps = {
   title: string;
   body: string;
-  imageUrl: string;
+  images: ProductImage[];
   imageAlt: string;
 };
 
-export function About({ title, body, imageUrl, imageAlt }: AboutProps) {
+export function About({ title, body, images, imageAlt }: AboutProps) {
   return (
     <section className="py-24 md:py-32">
       <Container className="grid grid-cols-1 items-center gap-12 md:grid-cols-2 md:gap-20">
@@ -21,8 +23,7 @@ export function About({ title, body, imageUrl, imageAlt }: AboutProps) {
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           className="relative aspect-[4/5] overflow-hidden bg-[var(--color-grey-100)] md:order-1"
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={imageUrl} alt={imageAlt} className="h-full w-full object-cover" />
+          <ImageCarousel images={images} fallbackAlt={imageAlt} className="absolute inset-0" />
         </motion.div>
 
         <motion.div

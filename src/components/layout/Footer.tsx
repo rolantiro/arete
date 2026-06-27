@@ -29,6 +29,11 @@ export function Footer({ brandName, tagline, address, email, phone }: FooterProp
               </Link>
             </li>
             <li>
+              <Link href="/kolaborasi" className="hover:opacity-60">
+                Kolaborasi
+              </Link>
+            </li>
+            <li>
               <Link href="/wishlist" className="hover:opacity-60">
                 Wishlist
               </Link>
