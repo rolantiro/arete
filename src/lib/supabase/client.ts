@@ -7,8 +7,16 @@ import { createBrowserClient } from "@supabase/ssr";
  * supabase/migrations/0002_rls_policies.sql).
  */
 export function createClient() {
-  return createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
+
+  if (!url || !anonKey) {
+    throw new Error(
+      "Supabase belum terkonfigurasi: NEXT_PUBLIC_SUPABASE_URL atau " +
+        "NEXT_PUBLIC_SUPABASE_ANON_KEY tidak ditemukan di environment " +
+        "variables. Cek Project Settings > Environment Variables di Vercel."
+    );
+  }
+
+  return createBrowserClient(url, anonKey);
 }

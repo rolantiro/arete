@@ -33,23 +33,31 @@ function LoginForm() {
     }
 
     setLoading(true);
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-    if (error) {
-      toast.error("Email atau password salah");
-      return;
+      if (error) {
+        console.error("[admin-login] signInWithPassword error:", error);
+        toast.error(`Gagal masuk: ${error.message}`);
+        setLoading(false);
+        return;
+      }
+
+      toast.success("Berhasil masuk");
+      const redirectTo = searchParams.get("redirectTo") || "/admin/dashboard";
+      // Hard navigation (not router.push) so the browser sends a fresh
+      // request with the just-set Supabase auth cookie already attached.
+      // A client-side transition can race ahead of the cookie write and
+      // cause middleware to see a stale/missing session, bouncing back
+      // to /admin/login in a loop.
+      window.location.href = redirectTo;
+    } catch (err) {
+      console.error("[admin-login] unexpected exception:", err);
+      const message = err instanceof Error ? err.message : "Kesalahan tidak diketahui";
+      toast.error(`Terjadi kesalahan: ${message}`);
+      setLoading(false);
     }
-
-    toast.success("Berhasil masuk");
-    const redirectTo = searchParams.get("redirectTo") || "/admin/dashboard";
-    // Hard navigation (not router.push) so the browser sends a fresh
-    // request with the just-set Supabase auth cookie already attached.
-    // A client-side transition can race ahead of the cookie write and
-    // cause middleware to see a stale/missing session, bouncing back
-    // to /admin/login in a loop.
-    window.location.href = redirectTo;
   }
 
   return (
