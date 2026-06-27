@@ -1,0 +1,115 @@
+@import "tailwindcss";
+
+/* =========================================================
+   ARÉTÉ — Design tokens
+   Palette: warm off-white / near-black, warm greys, one
+   restrained gold accent used only for tiny highlights.
+   ========================================================= */
+:root {
+  --color-paper: #fafaf8;       /* off-white background */
+  --color-ink: #0a0a0a;         /* near-black */
+  --color-ink-soft: #1c1c1a;
+  --color-grey-500: #8c8884;    /* secondary text */
+  --color-grey-300: #d4d1cb;    /* borders / dividers */
+  --color-grey-100: #ece9e3;    /* subtle surface */
+  --color-gold: #c9a876;        /* restrained accent */
+  --color-error: #b3261e;
+
+  --font-display: var(--font-playfair), Georgia, serif;
+  --font-body: var(--font-inter), system-ui, sans-serif;
+
+  --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@theme inline {
+  --color-paper: var(--color-paper);
+  --color-ink: var(--color-ink);
+  --color-ink-soft: var(--color-ink-soft);
+  --color-grey-500: var(--color-grey-500);
+  --color-grey-300: var(--color-grey-300);
+  --color-grey-100: var(--color-grey-100);
+  --color-gold: var(--color-gold);
+  --color-error: var(--color-error);
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+}
+
+* {
+  border-color: var(--color-grey-300);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Visible keyboard focus everywhere, no exceptions */
+:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+/* Thin, refined scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-paper);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-grey-300);
+  border-radius: 0;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-grey-500);
+}
+
+/* Selection color matches brand */
+::selection {
+  background: var(--color-ink);
+  color: var(--color-paper);
+}
+
+/* Reduced motion respected globally */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Lightweight glassmorphism utility used sparingly (navbar, modals) */
+.glass {
+  background: rgba(250, 250, 248, 0.72);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+}
+.glass-dark {
+  background: rgba(10, 10, 10, 0.6);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+}
+
+/* Hairline divider, the recurring structural device of this design */
+.hairline {
+  border-top: 1px solid var(--color-grey-300);
+}
+
+/* Tracked label text (eyebrows, captions) */
+.tracked {
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
