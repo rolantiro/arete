@@ -48,12 +48,24 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  const { data } = await supabase.auth.getUser();
-  const user = data.user;
+  let user = null;
+  try {
+    const { data, error } = await supabase.auth.getUser();
+    if (error) {
+      console.error("[middleware] getUser error:", error.message);
+    }
+    user = data.user;
+  } catch (err) {
+    console.error("[middleware] getUser threw:", err);
+  }
 
   const { pathname } = request.nextUrl;
   const isAdminRoute = pathname.startsWith("/admin");
   const isLoginRoute = pathname === "/admin/login";
+
+  console.log(
+    `[middleware] path=${pathname} isAdminRoute=${isAdminRoute} isLoginRoute=${isLoginRoute} hasUser=${!!user}`
+  );
 
   if (isAdminRoute && !isLoginRoute && !user) {
     const loginUrl = new URL("/admin/login", request.url);
