@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Package,
+  ReceiptText,
   Image as ImageIcon,
   FileText,
   Settings,
@@ -18,6 +19,7 @@ import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/pesanan", label: "Pesanan", icon: ReceiptText },
   { href: "/admin/produk", label: "Produk", icon: Package },
   { href: "/admin/media", label: "Media", icon: ImageIcon },
   { href: "/admin/halaman", label: "Halaman Website", icon: FileText },

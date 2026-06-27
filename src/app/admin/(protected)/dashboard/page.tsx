@@ -1,4 +1,5 @@
-import { Package, AlertTriangle, FolderTree, Tag } from "lucide-react";
+import { Package, AlertTriangle, FolderTree, Tag, ReceiptText } from "lucide-react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { formatPrice } from "@/lib/utils";
 
@@ -10,6 +11,7 @@ async function getDashboardStats() {
     { count: lowStockCount },
     { count: totalCategories },
     { data: products },
+    { count: pendingOrders },
   ] = await Promise.all([
     supabase.from("products").select("*", { count: "exact", head: true }),
     supabase
@@ -18,6 +20,10 @@ async function getDashboardStats() {
       .lte("stock", 5),
     supabase.from("categories").select("*", { count: "exact", head: true }),
     supabase.from("products").select("price, stock").eq("is_active", true),
+    supabase
+      .from("orders")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "menunggu_verifikasi"),
   ]);
 
   const inventoryValue = (products ?? []).reduce(
@@ -30,6 +36,7 @@ async function getDashboardStats() {
     lowStockCount: lowStockCount ?? 0,
     totalCategories: totalCategories ?? 0,
     inventoryValue,
+    pendingOrders: pendingOrders ?? 0,
   };
 }
 
@@ -37,6 +44,13 @@ export default async function AdminDashboardPage() {
   const stats = await getDashboardStats();
 
   const cards = [
+    {
+      label: "Pesanan Menunggu Verifikasi",
+      value: stats.pendingOrders.toString(),
+      icon: ReceiptText,
+      href: "/admin/pesanan",
+      highlight: stats.pendingOrders > 0,
+    },
     {
       label: "Total Produk",
       value: stats.totalProducts.toString(),
@@ -64,22 +78,36 @@ export default async function AdminDashboardPage() {
       <p className="tracked mb-3 text-xs text-[var(--color-grey-500)]">Ringkasan</p>
       <h1 className="font-display mb-10 text-3xl md:text-4xl">Dashboard</h1>
 
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {cards.map((card) => (
-          <div
-            key={card.label}
-            className="border border-[var(--color-grey-300)] p-6"
-          >
-            <card.icon
-              className="mb-4 h-5 w-5 text-[var(--color-grey-500)]"
-              strokeWidth={1.5}
-            />
-            <p className="text-2xl font-medium">{card.value}</p>
-            <p className="tracked mt-2 text-[11px] text-[var(--color-grey-500)]">
-              {card.label}
-            </p>
-          </div>
-        ))}
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5">
+        {cards.map((card) => {
+          const content = (
+            <>
+              <card.icon
+                className="mb-4 h-5 w-5 text-[var(--color-grey-500)]"
+                strokeWidth={1.5}
+              />
+              <p className="text-2xl font-medium">{card.value}</p>
+              <p className="tracked mt-2 text-[11px] text-[var(--color-grey-500)]">
+                {card.label}
+              </p>
+            </>
+          );
+          const className = `border p-6 ${
+            card.highlight
+              ? "border-[var(--color-gold)] bg-[var(--color-gold)]/10"
+              : "border-[var(--color-grey-300)]"
+          }`;
+
+          return card.href ? (
+            <Link key={card.label} href={card.href} className={className}>
+              {content}
+            </Link>
+          ) : (
+            <div key={card.label} className={className}>
+              {content}
+            </div>
+          );
+        })}
       </div>
 
       <div className="mt-12 border border-[var(--color-grey-300)] p-8">

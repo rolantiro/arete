@@ -195,9 +195,12 @@ export default function KeranjangPage() {
                   <span>Total</span>
                   <span>{formatPrice(subtotal)}</span>
                 </div>
-                <button className="tracked mt-8 w-full bg-[var(--color-ink)] py-4 text-xs text-[var(--color-paper)] transition-opacity hover:opacity-90">
+                <Link
+                  href="/checkout"
+                  className="tracked mt-8 flex w-full items-center justify-center bg-[var(--color-ink)] py-4 text-xs text-[var(--color-paper)] transition-opacity hover:opacity-90"
+                >
                   Checkout
-                </button>
+                </Link>
               </div>
             </div>
           )}

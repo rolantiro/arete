@@ -86,6 +86,62 @@ export type WishlistItem = {
 };
 
 // =========================================================
+// Orders / Checkout
+// =========================================================
+export type OrderStatus =
+  | "menunggu_verifikasi"
+  | "diproses"
+  | "dikirim"
+  | "selesai"
+  | "dibatalkan";
+
+export type OrderItem = {
+  id: string;
+  order_id: string;
+  product_id: string | null;
+  product_name: string;
+  product_image_url: string | null;
+  size: string | null;
+  color: string | null;
+  quantity: number;
+  price_at_purchase: number;
+  created_at: string;
+};
+
+export type Order = {
+  id: string;
+  order_number: string;
+  full_name: string;
+  email: string | null;
+  whatsapp: string;
+  notes: string | null;
+  province_id: string;
+  province_name: string;
+  regency_id: string;
+  regency_name: string;
+  district_id: string;
+  district_name: string;
+  village_id: string;
+  village_name: string;
+  postal_code: string | null;
+  address_detail: string;
+  landmark: string | null;
+  payment_method: string;
+  payment_proof_url: string | null;
+  payment_verified: boolean;
+  payment_verified_at: string | null;
+  shipping_estimate_label: string | null;
+  shipping_cost: number | null;
+  subtotal: number;
+  total: number;
+  status: OrderStatus;
+  agreed_to_terms: boolean;
+  created_at: string;
+  updated_at: string;
+  items?: OrderItem[];
+};
+
+// =========================================================
 // Helper shape: website copy flattened into a nested object,
 // e.g. content.hero.title, content.footer.email
 // =========================================================
