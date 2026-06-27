@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth-guard";
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB — generous since ImagePicker
+// crops every image client-side before upload, so what actually
+// reaches here is already sized to its display frame, not a raw
+// multi-megapixel camera/phone photo.
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
 export async function POST(req: NextRequest) {
@@ -24,7 +27,7 @@ export async function POST(req: NextRequest) {
     );
   }
   if (file.size > MAX_FILE_SIZE) {
-    return NextResponse.json({ error: "Ukuran file maksimal 5MB" }, { status: 400 });
+    return NextResponse.json({ error: "Ukuran file maksimal 15MB" }, { status: 400 });
   }
 
   const supabase = await createClient();

@@ -183,7 +183,13 @@ export default function AdminMediaPage() {
                   className="hidden"
                   onChange={(e) => {
                     const file = e.target.files?.[0];
-                    if (file) setCropFile({ slot, file });
+                    if (file) {
+                      if (file.size > 15 * 1024 * 1024) {
+                        toast.error("Ukuran file melebihi 15MB");
+                      } else {
+                        setCropFile({ slot, file });
+                      }
+                    }
                     e.target.value = "";
                   }}
                 />

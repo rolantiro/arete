@@ -24,9 +24,22 @@ export function ImagePicker({
   // the same frame.
   const [cropQueue, setCropQueue] = useState<File[]>([]);
 
+  const MAX_SOURCE_SIZE = 15 * 1024 * 1024; // 15MB, matches /api/admin/upload
+
   function handleFiles(files: FileList | null) {
     if (!files || files.length === 0) return;
-    setCropQueue(Array.from(files));
+
+    const accepted: File[] = [];
+    for (const file of Array.from(files)) {
+      if (file.size > MAX_SOURCE_SIZE) {
+        toast.error(`"${file.name}" melebihi 15MB dan dilewati`);
+        continue;
+      }
+      accepted.push(file);
+    }
+    if (accepted.length > 0) {
+      setCropQueue(accepted);
+    }
     if (inputRef.current) inputRef.current.value = "";
   }
 
