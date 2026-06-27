@@ -5,6 +5,7 @@ import { Loader2, Upload, Check } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/Button";
 import { ImagePicker } from "@/components/admin/ImagePicker";
+import { ImageCropModal, type CropContext } from "@/components/admin/ImageCropModal";
 import type { ProductImage } from "@/types/database";
 
 type ImageSlotRow = { slot: string; url: string; alt: string; urls: ProductImage[] };
@@ -16,16 +17,18 @@ const SINGLE_SLOTS: Record<string, { title: string; description: string }> = {
   },
 };
 
-const MULTI_SLOTS: Record<string, { title: string; description: string }> = {
+const MULTI_SLOTS: Record<string, { title: string; description: string; cropContext: CropContext }> = {
   banner_home: {
     title: "Banner Beranda",
     description:
       "Bisa lebih dari satu gambar — akan tampil bergantian (slideshow) di hero section halaman depan.",
+    cropContext: "banner",
   },
   about_image: {
     title: "Gambar Tentang Kami",
     description:
       "Bisa lebih dari satu gambar — akan tampil bergantian (slideshow) di bagian filosofi/tentang kami.",
+    cropContext: "about",
   },
 };
 
@@ -35,6 +38,7 @@ export default function AdminMediaPage() {
   const [uploadingSlot, setUploadingSlot] = useState<string | null>(null);
   const [savingSlot, setSavingSlot] = useState<string | null>(null);
   const fileInputs = useRef<Record<string, HTMLInputElement | null>>({});
+  const [cropFile, setCropFile] = useState<{ slot: string; file: File } | null>(null);
 
   useEffect(() => {
     fetch("/api/admin/images")
@@ -125,6 +129,8 @@ export default function AdminMediaPage() {
                 <ImagePicker
                   images={image?.urls ?? []}
                   onChange={(newImages) => handleMultiSave(slot, newImages)}
+                  context={meta.cropContext}
+                  label="Gambar"
                 />
 
                 {savingSlot === slot && (
@@ -173,11 +179,11 @@ export default function AdminMediaPage() {
                     fileInputs.current[slot] = el;
                   }}
                   type="file"
-                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  accept="image/jpeg,image/png,image/webp"
                   className="hidden"
                   onChange={(e) => {
                     const file = e.target.files?.[0];
-                    if (file) handleSingleUpload(slot, file);
+                    if (file) setCropFile({ slot, file });
                     e.target.value = "";
                   }}
                 />
@@ -202,6 +208,19 @@ export default function AdminMediaPage() {
           })}
         </div>
       </div>
+
+      {cropFile && (
+        <ImageCropModal
+          file={cropFile.file}
+          context="logo"
+          onCancel={() => setCropFile(null)}
+          onCropped={(croppedFile) => {
+            const slot = cropFile.slot;
+            setCropFile(null);
+            handleSingleUpload(slot, croppedFile);
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -123,7 +123,12 @@ export function ProductForm({
         </div>
       )}
 
-      <ImagePicker images={values.images} onChange={(images) => update("images", images)} />
+      <ImagePicker
+        images={values.images}
+        onChange={(images) => update("images", images)}
+        context="product"
+        label="Foto Produk"
+      />
 
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
         <Input

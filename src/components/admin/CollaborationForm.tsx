@@ -109,7 +109,12 @@ export function CollaborationForm({ initial }: { initial?: Collaboration }) {
         </div>
       )}
 
-      <ImagePicker images={values.images} onChange={(images) => update("images", images)} />
+      <ImagePicker
+        images={values.images}
+        onChange={(images) => update("images", images)}
+        context="collaboration"
+        label="Foto Kolaborasi"
+      />
 
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
         <Input
