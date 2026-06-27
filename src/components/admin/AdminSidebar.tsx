@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Package,
@@ -26,14 +26,15 @@ const NAV_ITEMS = [
 
 export function AdminSidebar({ adminName }: { adminName: string }) {
   const pathname = usePathname();
-  const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   async function handleLogout() {
     const supabase = createClient();
     await supabase.auth.signOut();
-    router.push("/admin/login");
-    router.refresh();
+    // Hard navigation clears any in-memory client state and
+    // guarantees the next request to /admin/login sees the cleared
+    // auth cookie rather than racing a client-side transition.
+    window.location.href = "/admin/login";
   }
 
   const sidebarContent = (

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/Button";
 import { loginSchema } from "@/lib/validations";
 
 function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -45,8 +44,12 @@ function LoginForm() {
 
     toast.success("Berhasil masuk");
     const redirectTo = searchParams.get("redirectTo") || "/admin/dashboard";
-    router.push(redirectTo);
-    router.refresh();
+    // Hard navigation (not router.push) so the browser sends a fresh
+    // request with the just-set Supabase auth cookie already attached.
+    // A client-side transition can race ahead of the cookie write and
+    // cause middleware to see a stale/missing session, bouncing back
+    // to /admin/login in a loop.
+    window.location.href = redirectTo;
   }
 
   return (
