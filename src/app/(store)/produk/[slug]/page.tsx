@@ -4,6 +4,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Container } from "@/components/ui/Container";
 import { ProductCard } from "@/components/store/ProductCard";
+import { ProductGallery } from "@/components/store/ProductGallery";
 import { ProductDetailActions } from "@/components/store/ProductDetailActions";
 import { getWebsiteContent, getWebsiteImages } from "@/lib/data/content";
 import { getProductBySlug, getRelatedProducts } from "@/lib/data/products";
@@ -50,7 +51,6 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
     .maybeSingle();
 
   const brandName = content.navbar?.brand_name || "ARÉTÉ";
-  const cover = product.images?.[0];
   const onSale = product.compare_at_price && product.compare_at_price > product.price;
 
   return (
@@ -60,20 +60,7 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
       <main className="flex-1 py-12 md:py-16">
         <Container>
           <div className="grid grid-cols-1 gap-12 md:grid-cols-2 md:gap-16">
-            <div className="aspect-[3/4] overflow-hidden bg-[var(--color-grey-100)]">
-              {cover ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={cover.url}
-                  alt={cover.alt || product.name}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center text-[var(--color-grey-500)]">
-                  Tidak ada gambar
-                </div>
-              )}
-            </div>
+            <ProductGallery images={product.images ?? []} productName={product.name} />
 
             <div>
               {product.category?.name && (
@@ -98,10 +85,20 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
                 {product.description}
               </p>
 
-              {product.stock > 0 && product.stock <= 5 && (
-                <p className="mt-3 text-xs text-[var(--color-error)]">
-                  Hanya tersisa {product.stock} stok
-                </p>
+              {product.is_preorder ? (
+                <div className="mt-4 inline-flex items-center gap-2 border border-[var(--color-gold)] bg-[var(--color-gold)]/10 px-4 py-2.5">
+                  <span className="tracked text-xs text-[var(--color-ink)]">
+                    Pre-Order — estimasi pengiriman {product.preorder_days ?? "beberapa"}{" "}
+                    hari setelah pesanan diverifikasi
+                  </span>
+                </div>
+              ) : (
+                product.stock > 0 &&
+                product.stock <= 5 && (
+                  <p className="mt-3 text-xs text-[var(--color-error)]">
+                    Hanya tersisa {product.stock} stok
+                  </p>
+                )
               )}
 
               <div className="mt-8">

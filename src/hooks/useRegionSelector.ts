@@ -3,14 +3,32 @@
 import { useEffect, useState, useCallback } from "react";
 import type { Province, Regency, District, Village } from "@/types/region";
 
-const BASE_URL = "https://emsifa.github.io/api-wilayah-indonesia/api";
+/**
+ * Fetches region data through our own /api/regions proxy (see
+ * src/app/api/regions/route.ts) rather than calling
+ * emsifa.github.io directly from the browser. The proxy handles
+ * retries and caching server-side and can't be blocked by a CORS
+ * issue the way a direct browser fetch could.
+ */
+async function fetchRegion<T>(type: string, parent?: string): Promise<T> {
+  const params = new URLSearchParams({ type });
+  if (parent) params.set("parent", parent);
+
+  const res = await fetch(`/api/regions?${params.toString()}`);
+  const body = await res.json().catch(() => null);
+
+  if (!res.ok) {
+    const detail = body?.details ? ` (${body.details})` : "";
+    throw new Error((body?.error ?? `HTTP ${res.status}`) + detail);
+  }
+  return body.data as T;
+}
 
 /**
  * Cascading Indonesia region selector state (provinsi -> kota/
- * kabupaten -> kecamatan -> kelurahan), backed by the free,
- * keyless emsifa/api-wilayah-indonesia static API. Each level
- * only fetches once its parent is selected, and resets all
- * descendant selections whenever a parent changes.
+ * kabupaten -> kecamatan -> kelurahan). Each level only fetches
+ * once its parent is selected, and resets all descendant
+ * selections whenever a parent changes.
  */
 export function useRegionSelector() {
   const [provinces, setProvinces] = useState<Province[]>([]);
@@ -30,19 +48,25 @@ export function useRegionSelector() {
     villages: false,
   });
   const [fetchError, setFetchError] = useState(false);
+  const [lastErrorMessage, setLastErrorMessage] = useState<string | null>(null);
+
+  const loadProvinces = useCallback(() => {
+    setFetchError(false);
+    setLastErrorMessage(null);
+    setLoading((s) => ({ ...s, provinces: true }));
+    fetchRegion<Province[]>("provinces")
+      .then((data) => setProvinces(data))
+      .catch((err) => {
+        setFetchError(true);
+        setLastErrorMessage(err instanceof Error ? err.message : String(err));
+      })
+      .finally(() => setLoading((s) => ({ ...s, provinces: false })));
+  }, []);
 
   // Load provinces once on mount
   useEffect(() => {
-    setLoading((s) => ({ ...s, provinces: true }));
-    fetch(`${BASE_URL}/provinces.json`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to load provinces");
-        return res.json();
-      })
-      .then((data: Province[]) => setProvinces(data))
-      .catch(() => setFetchError(true))
-      .finally(() => setLoading((s) => ({ ...s, provinces: false })));
-  }, []);
+    loadProvinces();
+  }, [loadProvinces]);
 
   const selectProvince = useCallback((id: string) => {
     setProvinceId(id);
@@ -54,14 +78,14 @@ export function useRegionSelector() {
     setVillages([]);
 
     if (!id) return;
+    setFetchError(false);
     setLoading((s) => ({ ...s, regencies: true }));
-    fetch(`${BASE_URL}/regencies/${id}.json`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to load regencies");
-        return res.json();
+    fetchRegion<Regency[]>("regencies", id)
+      .then((data) => setRegencies(data))
+      .catch((err) => {
+        setFetchError(true);
+        setLastErrorMessage(err instanceof Error ? err.message : String(err));
       })
-      .then((data: Regency[]) => setRegencies(data))
-      .catch(() => setFetchError(true))
       .finally(() => setLoading((s) => ({ ...s, regencies: false })));
   }, []);
 
@@ -73,14 +97,14 @@ export function useRegionSelector() {
     setVillages([]);
 
     if (!id) return;
+    setFetchError(false);
     setLoading((s) => ({ ...s, districts: true }));
-    fetch(`${BASE_URL}/districts/${id}.json`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to load districts");
-        return res.json();
+    fetchRegion<District[]>("districts", id)
+      .then((data) => setDistricts(data))
+      .catch((err) => {
+        setFetchError(true);
+        setLastErrorMessage(err instanceof Error ? err.message : String(err));
       })
-      .then((data: District[]) => setDistricts(data))
-      .catch(() => setFetchError(true))
       .finally(() => setLoading((s) => ({ ...s, districts: false })));
   }, []);
 
@@ -90,14 +114,14 @@ export function useRegionSelector() {
     setVillages([]);
 
     if (!id) return;
+    setFetchError(false);
     setLoading((s) => ({ ...s, villages: true }));
-    fetch(`${BASE_URL}/villages/${id}.json`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to load villages");
-        return res.json();
+    fetchRegion<Village[]>("villages", id)
+      .then((data) => setVillages(data))
+      .catch((err) => {
+        setFetchError(true);
+        setLastErrorMessage(err instanceof Error ? err.message : String(err));
       })
-      .then((data: Village[]) => setVillages(data))
-      .catch(() => setFetchError(true))
       .finally(() => setLoading((s) => ({ ...s, villages: false })));
   }, []);
 
@@ -128,5 +152,7 @@ export function useRegionSelector() {
     selectedNames,
     loading,
     fetchError,
+    lastErrorMessage,
+    retryLoadProvinces: loadProvinces,
   };
 }

@@ -39,14 +39,30 @@ export function RegionSelector({ onComplete, error }: RegionSelectorProps) {
     });
   }
 
-  if (region.fetchError) {
+  if (region.fetchError && region.provinces.length === 0) {
     return (
-      <p className="text-sm text-[var(--color-error)]">
-        Gagal memuat data wilayah. Periksa koneksi internet Anda dan muat ulang
-        halaman.
-      </p>
+      <div className="border border-[var(--color-error)] bg-[var(--color-error)]/5 p-4">
+        <p className="text-sm text-[var(--color-error)]">
+          Gagal memuat data wilayah. Periksa koneksi internet Anda, lalu coba
+          lagi.
+        </p>
+        {region.lastErrorMessage && (
+          <p className="mt-1 text-xs text-[var(--color-error)]/70">
+            Detail: {region.lastErrorMessage}
+          </p>
+        )}
+        <button
+          type="button"
+          onClick={region.retryLoadProvinces}
+          className="tracked mt-3 border border-[var(--color-error)] px-4 py-2 text-xs text-[var(--color-error)] transition-colors hover:bg-[var(--color-error)] hover:text-white"
+        >
+          Coba Lagi
+        </button>
+      </div>
     );
   }
+
+  const showInlineError = region.fetchError && region.provinces.length > 0;
 
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -85,6 +101,12 @@ export function RegionSelector({ onComplete, error }: RegionSelectorProps) {
         placeholder="Pilih Kelurahan"
         disabled={!region.districtId}
       />
+      {showInlineError && (
+        <p className="md:col-span-2 text-xs text-[var(--color-error)]">
+          Gagal memuat sebagian data wilayah. Coba pilih ulang field di atas,
+          atau muat ulang halaman jika berlanjut.
+        </p>
+      )}
       {error && <p className="md:col-span-2 text-xs text-[var(--color-error)]">{error}</p>}
     </div>
   );

@@ -34,6 +34,8 @@ export type Product = {
   colors: string[];
   is_featured: boolean;
   is_active: boolean;
+  is_preorder: boolean;
+  preorder_days: number | null;
   created_at: string;
   updated_at: string;
   // Populated via join when fetched with category info

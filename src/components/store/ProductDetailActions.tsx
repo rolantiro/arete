@@ -23,7 +23,7 @@ export function ProductDetailActions({
   const incrementCart = useCounterStore((s) => s.incrementCart);
   const toggleWishlistCount = useCounterStore((s) => s.toggleWishlist);
 
-  const outOfStock = product.stock <= 0;
+  const outOfStock = !product.is_preorder && product.stock <= 0;
 
   async function handleAddToCart() {
     if (outOfStock) return;
@@ -143,7 +143,11 @@ export function ProductDetailActions({
           ) : (
             <ShoppingBag className="h-4 w-4" strokeWidth={1.5} />
           )}
-          {outOfStock ? "Stok Habis" : "Tambah ke Keranjang"}
+          {outOfStock
+            ? "Stok Habis"
+            : product.is_preorder
+              ? "Pre-Order Sekarang"
+              : "Tambah ke Keranjang"}
         </button>
         <button
           onClick={handleWishlist}

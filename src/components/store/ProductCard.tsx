@@ -22,7 +22,9 @@ export function ProductCard({ product, initialWishlisted = false }: ProductCardP
   const toggleWishlistCount = useCounterStore((s) => s.toggleWishlist);
 
   const cover = product.images?.[0];
-  const outOfStock = product.stock <= 0;
+  // A pre-order product can be added to cart even with zero stock —
+  // the whole point of pre-order is selling before stock exists.
+  const outOfStock = !product.is_preorder && product.stock <= 0;
   const onSale =
     product.compare_at_price && product.compare_at_price > product.price;
 
@@ -98,7 +100,14 @@ export function ProductCard({ product, initialWishlisted = false }: ProductCardP
               </span>
             </div>
           )}
-          {!outOfStock && onSale && (
+          {product.is_preorder && (
+            <div className="absolute left-0 top-0 bg-[var(--color-gold)] px-3 py-1.5">
+              <span className="tracked text-[10px] text-[var(--color-ink)]">
+                Pre-Order{product.preorder_days ? ` · ${product.preorder_days} Hari` : ""}
+              </span>
+            </div>
+          )}
+          {!outOfStock && !product.is_preorder && onSale && (
             <div className="absolute left-0 top-0 bg-[var(--color-gold)] px-3 py-1.5">
               <span className="tracked text-[10px] text-[var(--color-ink)]">Diskon</span>
             </div>
@@ -131,7 +140,11 @@ export function ProductCard({ product, initialWishlisted = false }: ProductCardP
               ) : (
                 <ShoppingBag className="h-3.5 w-3.5" strokeWidth={1.5} />
               )}
-              {outOfStock ? "Stok Habis" : "Tambah ke Keranjang"}
+              {outOfStock
+                ? "Stok Habis"
+                : product.is_preorder
+                  ? "Pre-Order Sekarang"
+                  : "Tambah ke Keranjang"}
             </button>
           </div>
         </div>

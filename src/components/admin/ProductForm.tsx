@@ -23,6 +23,8 @@ type ProductFormValues = {
   colors: string[];
   is_featured: boolean;
   is_active: boolean;
+  is_preorder: boolean;
+  preorder_days: number | null;
 };
 
 function slugify(text: string) {
@@ -61,6 +63,8 @@ export function ProductForm({
     colors: initialProduct?.colors ?? [],
     is_featured: initialProduct?.is_featured ?? false,
     is_active: initialProduct?.is_active ?? true,
+    is_preorder: initialProduct?.is_preorder ?? false,
+    preorder_days: initialProduct?.preorder_days ?? null,
   });
 
   function update<K extends keyof ProductFormValues>(key: K, value: ProductFormValues[K]) {
@@ -233,6 +237,52 @@ export function ProductForm({
           />
           Aktif (tampil di toko)
         </label>
+      </div>
+
+      <div className="border border-[var(--color-grey-300)] p-5">
+        <label className="flex items-center gap-2.5 text-sm">
+          <input
+            type="checkbox"
+            checked={values.is_preorder}
+            onChange={(e) => {
+              const checked = e.target.checked;
+              update("is_preorder", checked);
+              if (checked && !values.preorder_days) {
+                update("preorder_days", 7);
+              }
+              if (!checked) {
+                update("preorder_days", null);
+              }
+            }}
+            className="h-4 w-4 accent-[var(--color-ink)]"
+          />
+          Produk ini Pre-Order
+        </label>
+
+        {values.is_preorder && (
+          <div className="mt-4 flex flex-col gap-2">
+            <label className="tracked text-[11px] text-[var(--color-grey-500)]">
+              Estimasi Waktu Pre-Order (1–20 hari)
+            </label>
+            <div className="flex items-center gap-4">
+              <input
+                type="range"
+                min={1}
+                max={20}
+                value={values.preorder_days ?? 7}
+                onChange={(e) => update("preorder_days", Number(e.target.value))}
+                className="flex-1 accent-[var(--color-ink)]"
+              />
+              <span className="w-20 shrink-0 text-right text-sm font-medium">
+                {values.preorder_days ?? 7} hari
+              </span>
+            </div>
+            <p className="text-xs text-[var(--color-grey-500)]">
+              Pembeli akan melihat keterangan &ldquo;Pre-Order, estimasi{" "}
+              {values.preorder_days ?? 7} hari&rdquo; pada produk ini.
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="flex gap-3">
