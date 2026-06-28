@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getOrCreateSessionId } from "@/lib/session";
 import { checkoutSchema } from "@/lib/validations";
+import { validateVoucher } from "@/lib/voucher";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -100,6 +101,32 @@ export async function POST(req: NextRequest) {
   const sessionId = await getOrCreateSessionId();
   const adminSupabase = createAdminClient();
 
+  // Re-validate the voucher server-side against fresh data — never
+  // trust the discount amount the client claims, since the client
+  // only ever saw a preview computed from possibly-stale data.
+  const voucherCode = String(formData.get("voucher_code") ?? "").trim().toUpperCase();
+  let voucherId: string | null = null;
+  let discountAmount = 0;
+  let freeShipping = false;
+
+  if (voucherCode) {
+    const { data: voucherRow } = await adminSupabase
+      .from("vouchers")
+      .select("*")
+      .eq("code", voucherCode)
+      .maybeSingle();
+
+    const result = validateVoucher(voucherRow, subtotal);
+    if (!result.valid) {
+      return NextResponse.json({ error: result.reason }, { status: 400 });
+    }
+    voucherId = result.voucher.id;
+    discountAmount = result.discountAmount;
+    freeShipping = result.freeShipping;
+  }
+
+  const total = Math.max(0, subtotal - discountAmount);
+
   // 1. Upload payment proof to Storage (service role required —
   //    storage write policies are admin-only; checkout submission
   //    is the one deliberate exception, gated by this server-only
@@ -144,8 +171,12 @@ export async function POST(req: NextRequest) {
       payment_method: "bank_transfer",
       payment_proof_url: publicUrlData.publicUrl,
       shipping_estimate_label: shippingEstimateLabel || null,
+      voucher_id: voucherId,
+      voucher_code: voucherCode || null,
+      discount_amount: discountAmount,
+      free_shipping: freeShipping,
       subtotal,
-      total: subtotal, // shipping_cost is null until admin sets it
+      total, // shipping_cost is added on top once an admin sets it
       agreed_to_terms: parsed.data.agreed_to_terms,
       status: "menunggu_verifikasi",
     })
@@ -180,7 +211,15 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // 4. Clear the guest's cart now that the order is placed
+  // 4. Increment the voucher's usage counter now that the order is
+  //    confirmed to exist (a failed upload/insert above never
+  //    reaches here, so a voucher attempt that didn't result in a
+  //    real order never burns a use).
+  if (voucherId) {
+    await adminSupabase.rpc("increment_voucher_usage", { voucher_id: voucherId });
+  }
+
+  // 5. Clear the guest's cart now that the order is placed
   const customerSupabase = await createClient();
   await customerSupabase.from("cart_items").delete().eq("session_id", sessionId);
 

@@ -111,6 +111,28 @@ export type WishlistItem = {
 };
 
 // =========================================================
+// Vouchers / discount codes
+// =========================================================
+export type VoucherDiscountType = "amount" | "percent" | "free_shipping";
+
+export type Voucher = {
+  id: string;
+  code: string;
+  description: string | null;
+  discount_type: VoucherDiscountType;
+  discount_amount: number | null;
+  discount_percent: number | null;
+  min_purchase: number;
+  max_uses: number | null;
+  used_count: number;
+  starts_at: string | null;
+  expires_at: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+// =========================================================
 // Orders / Checkout
 // =========================================================
 export type OrderStatus =
@@ -157,6 +179,10 @@ export type Order = {
   payment_verified_at: string | null;
   shipping_estimate_label: string | null;
   shipping_cost: number | null;
+  voucher_id: string | null;
+  voucher_code: string | null;
+  discount_amount: number;
+  free_shipping: boolean;
   subtotal: number;
   total: number;
   status: OrderStatus;

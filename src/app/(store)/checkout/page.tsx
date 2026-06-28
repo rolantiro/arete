@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/Button";
 import { RegionSelector } from "@/components/store/RegionSelector";
 import { ShippingEstimateTable } from "@/components/store/ShippingEstimateTable";
 import { PaymentProofUpload } from "@/components/store/PaymentProofUpload";
+import { VoucherInput, type AppliedVoucher } from "@/components/store/VoucherInput";
 import { formatPrice } from "@/lib/utils";
 import { getShippingEstimate } from "@/lib/shipping";
 import { checkoutSchema } from "@/lib/validations";
@@ -51,6 +52,7 @@ export default function CheckoutPage() {
 
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [agreed, setAgreed] = useState(false);
+  const [voucher, setVoucher] = useState<AppliedVoucher | null>(null);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -66,6 +68,8 @@ export default function CheckoutPage() {
     0
   );
   const shippingEstimate = region ? getShippingEstimate(region.province_name) : null;
+  const discountAmount = voucher?.discount_amount ?? 0;
+  const totalAfterDiscount = Math.max(0, subtotal - discountAmount);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -119,6 +123,7 @@ export default function CheckoutPage() {
         formData.append(key, String(value));
       });
       formData.append("shipping_estimate_label", shippingEstimate?.label ?? "");
+      formData.append("voucher_code", voucher?.code ?? "");
       formData.append("payment_proof", proofFile);
       formData.append(
         "items",
@@ -298,7 +303,14 @@ export default function CheckoutPage() {
               {/* Pengiriman */}
               <section className="hairline pt-10">
                 <h2 className="font-display mb-5 text-xl">Pengiriman</h2>
-                <ShippingEstimateTable provinceName={region?.province_name ?? ""} />
+                {voucher?.free_shipping ? (
+                  <div className="border border-[var(--color-gold)] bg-[var(--color-gold)]/10 px-4 py-3 text-sm">
+                    Voucher gratis ongkir aktif — Anda tidak akan dikenakan biaya
+                    pengiriman untuk pesanan ini.
+                  </div>
+                ) : (
+                  <ShippingEstimateTable provinceName={region?.province_name ?? ""} />
+                )}
                 <label className="mt-5 flex items-start gap-3 text-sm">
                   <input
                     type="checkbox"
@@ -307,8 +319,9 @@ export default function CheckoutPage() {
                     className="mt-0.5 h-4 w-4 accent-[var(--color-ink)]"
                   />
                   <span>
-                    Saya setuju bahwa ongkos kirim ditanggung oleh saya (pembeli) dan
-                    dibayarkan saat barang sampai, sesuai estimasi pada tabel di atas.
+                    {voucher?.free_shipping
+                      ? "Saya memahami pesanan ini menggunakan voucher gratis ongkir."
+                      : "Saya setuju bahwa ongkos kirim ditanggung oleh saya (pembeli) dan dibayarkan saat barang sampai, sesuai estimasi pada tabel di atas."}
                   </span>
                 </label>
                 {errors.agreed_to_terms && (
@@ -346,22 +359,41 @@ export default function CheckoutPage() {
               </div>
 
               <div className="hairline mt-6 mb-4" />
+
+              <VoucherInput
+                subtotal={subtotal}
+                applied={voucher}
+                onApply={setVoucher}
+                onRemove={() => setVoucher(null)}
+              />
+
+              <div className="hairline mt-4 mb-4" />
               <div className="flex justify-between text-sm">
                 <span className="text-[var(--color-grey-500)]">Subtotal</span>
                 <span>{formatPrice(subtotal)}</span>
               </div>
+              {voucher && (
+                <div className="mt-2 flex justify-between text-sm">
+                  <span className="text-[var(--color-grey-500)]">Diskon Voucher</span>
+                  <span>
+                    {voucher.free_shipping ? "Gratis Ongkir" : `- ${formatPrice(discountAmount)}`}
+                  </span>
+                </div>
+              )}
               <div className="mt-2 flex justify-between text-sm">
                 <span className="text-[var(--color-grey-500)]">Estimasi Ongkir</span>
                 <span>
-                  {shippingEstimate
-                    ? `${formatPrice(shippingEstimate.min)}–${formatPrice(shippingEstimate.max)}`
-                    : "Pilih alamat dulu"}
+                  {voucher?.free_shipping
+                    ? "Gratis"
+                    : shippingEstimate
+                      ? `${formatPrice(shippingEstimate.min)}–${formatPrice(shippingEstimate.max)}`
+                      : "Pilih alamat dulu"}
                 </span>
               </div>
               <div className="hairline mt-4 mb-4" />
               <div className="flex justify-between text-base font-medium">
                 <span>Total (belum ongkir)</span>
-                <span>{formatPrice(subtotal)}</span>
+                <span>{formatPrice(totalAfterDiscount)}</span>
               </div>
 
               <Button

@@ -254,24 +254,31 @@ export default function AdminOrderDetailPage() {
             <p className="mb-3 text-xs text-[var(--color-grey-500)]">
               Estimasi pembeli: {order.shipping_estimate_label || "-"}
             </p>
-            <div className="flex gap-3">
-              <Input
-                type="number"
-                min={0}
-                placeholder="Masukkan ongkir final"
-                value={shippingCost}
-                onChange={(e) => setShippingCost(e.target.value)}
-                className="flex-1"
-              />
-              <Button
-                type="button"
-                size="sm"
-                isLoading={savingShipping}
-                onClick={handleSaveShipping}
-              >
-                Simpan
-              </Button>
-            </div>
+            {order.free_shipping ? (
+              <p className="border border-[var(--color-gold)] bg-[var(--color-gold)]/10 px-4 py-2.5 text-sm">
+                Pesanan ini menggunakan voucher gratis ongkir — ongkir otomatis
+                Rp0 berapa pun nominal yang dimasukkan.
+              </p>
+            ) : (
+              <div className="flex gap-3">
+                <Input
+                  type="number"
+                  min={0}
+                  placeholder="Masukkan ongkir final"
+                  value={shippingCost}
+                  onChange={(e) => setShippingCost(e.target.value)}
+                  className="flex-1"
+                />
+                <Button
+                  type="button"
+                  size="sm"
+                  isLoading={savingShipping}
+                  onClick={handleSaveShipping}
+                >
+                  Simpan
+                </Button>
+              </div>
+            )}
           </div>
 
           <div className="border border-[var(--color-grey-300)] p-6">
@@ -280,10 +287,28 @@ export default function AdminOrderDetailPage() {
               <span className="text-[var(--color-grey-500)]">Subtotal</span>
               <span>{formatPrice(order.subtotal)}</span>
             </div>
+            {order.voucher_code && (
+              <div className="mt-2 flex justify-between text-sm">
+                <span className="text-[var(--color-grey-500)]">
+                  Voucher ({order.voucher_code})
+                </span>
+                <span>
+                  {order.discount_amount > 0
+                    ? `- ${formatPrice(order.discount_amount)}`
+                    : order.free_shipping
+                      ? "Gratis Ongkir"
+                      : "-"}
+                </span>
+              </div>
+            )}
             <div className="mt-2 flex justify-between text-sm">
               <span className="text-[var(--color-grey-500)]">Ongkir</span>
               <span>
-                {order.shipping_cost != null ? formatPrice(order.shipping_cost) : "Belum diisi"}
+                {order.free_shipping
+                  ? "Gratis"
+                  : order.shipping_cost != null
+                    ? formatPrice(order.shipping_cost)
+                    : "Belum diisi"}
               </span>
             </div>
             <div className="hairline mt-4 mb-4" />

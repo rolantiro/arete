@@ -86,3 +86,39 @@ export const collaborationSchema = z.object({
   is_published: z.boolean().default(true),
 });
 export type CollaborationInput = z.infer<typeof collaborationSchema>;
+
+export const voucherSchema = z
+  .object({
+    code: z
+      .string()
+      .min(3, "Kode minimal 3 karakter")
+      .max(30, "Kode maksimal 30 karakter")
+      .regex(/^[A-Za-z0-9_-]+$/, "Kode hanya boleh huruf, angka, - dan _")
+      .transform((v) => v.toUpperCase()),
+    description: z.string().nullable().optional(),
+    discount_type: z.enum(["amount", "percent", "free_shipping"]),
+    discount_amount: z.coerce.number().min(0).nullable().optional(),
+    discount_percent: z.coerce.number().min(0.01).max(100).nullable().optional(),
+    min_purchase: z.coerce.number().min(0).default(0),
+    max_uses: z.coerce.number().int().min(1).nullable().optional(),
+    starts_at: z.string().nullable().optional(),
+    expires_at: z.string().nullable().optional(),
+    is_active: z.boolean().default(true),
+  })
+  .superRefine((data, ctx) => {
+    if (data.discount_type === "amount" && !data.discount_amount) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["discount_amount"],
+        message: "Nominal potongan wajib diisi untuk tipe ini",
+      });
+    }
+    if (data.discount_type === "percent" && !data.discount_percent) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["discount_percent"],
+        message: "Persentase potongan wajib diisi untuk tipe ini",
+      });
+    }
+  });
+export type VoucherInput = z.infer<typeof voucherSchema>;

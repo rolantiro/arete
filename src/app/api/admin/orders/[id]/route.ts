@@ -65,15 +65,23 @@ export async function PATCH(req: NextRequest, { params }: { params: Params }) {
   const supabase = await createClient();
 
   // Recompute total when shipping_cost changes, so total always
-  // reflects subtotal + the admin-confirmed shipping cost.
+  // reflects (subtotal - discount_amount) + effective shipping —
+  // and a free_shipping voucher zeroes the shipping line out
+  // entirely regardless of what figure the admin types in, since
+  // the customer was promised free shipping at checkout time.
   if (updatePayload.shipping_cost !== undefined) {
     const { data: existing } = await supabase
       .from("orders")
-      .select("subtotal")
+      .select("subtotal, discount_amount, free_shipping")
       .eq("id", id)
       .single();
     if (existing) {
-      updatePayload.total = existing.subtotal + (updatePayload.shipping_cost as number);
+      const effectiveShipping = existing.free_shipping
+        ? 0
+        : (updatePayload.shipping_cost as number);
+      updatePayload.shipping_cost = effectiveShipping;
+      updatePayload.total =
+        Math.max(0, existing.subtotal - existing.discount_amount) + effectiveShipping;
     }
   }
 
