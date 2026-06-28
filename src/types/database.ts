@@ -83,6 +83,7 @@ export type Collaboration = {
   is_for_sale: boolean;
   product_id: string | null;
   partner_name: string | null;
+  instagram_url: string | null;
   sort_order: number;
   is_published: boolean;
   created_at: string;

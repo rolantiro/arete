@@ -46,62 +46,72 @@ export default async function KolaborasiPage() {
                 const isComingSoon = collab.status === "coming_soon";
                 return (
                   <div key={collab.id} className="group">
-                    <div className="relative aspect-[4/5] overflow-hidden bg-[var(--color-grey-100)]">
-                      {cover ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={cover.url}
-                          alt={cover.alt || collab.title}
-                          className="h-full w-full object-cover transition-transform duration-700 ease-[var(--ease-premium)] group-hover:scale-105"
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center text-[var(--color-grey-500)]">
-                          Tidak ada gambar
-                        </div>
-                      )}
-
-                      <div
-                        className={cn(
-                          "absolute left-0 top-0 flex items-center gap-1.5 px-3 py-1.5",
-                          isComingSoon
-                            ? "bg-[var(--color-gold)] text-[var(--color-ink)]"
-                            : "bg-[var(--color-ink)] text-[var(--color-paper)]"
-                        )}
-                      >
-                        {isComingSoon ? (
-                          <Clock className="h-3 w-3" />
+                    <Link href={`/kolaborasi/${collab.slug}`}>
+                      <div className="relative aspect-[4/5] overflow-hidden bg-[var(--color-grey-100)]">
+                        {cover ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={cover.url}
+                            alt={cover.alt || collab.title}
+                            className="h-full w-full object-cover transition-transform duration-700 ease-[var(--ease-premium)] group-hover:scale-105"
+                          />
                         ) : (
-                          <Sparkles className="h-3 w-3" />
+                          <div className="flex h-full w-full items-center justify-center text-[var(--color-grey-500)]">
+                            Tidak ada gambar
+                          </div>
                         )}
-                        <span className="tracked text-[10px]">
-                          {isComingSoon ? "Coming Soon" : "Selesai"}
-                        </span>
-                      </div>
-                    </div>
 
-                    <div className="mt-4">
-                      <h3 className="font-display text-lg leading-snug">{collab.title}</h3>
-                      {collab.partner_name && (
-                        <p className="tracked mt-1 text-[10px] text-[var(--color-grey-500)]">
-                          bersama {collab.partner_name}
-                        </p>
-                      )}
-                      {collab.description && (
-                        <p className="mt-2 line-clamp-2 text-sm text-[var(--color-grey-500)]">
-                          {collab.description}
-                        </p>
-                      )}
+                        {collab.images && collab.images.length > 1 && (
+                          <div className="absolute right-3 top-3 bg-[var(--color-paper)]/90 px-2 py-1">
+                            <span className="text-[10px] text-[var(--color-ink)]">
+                              +{collab.images.length - 1} foto
+                            </span>
+                          </div>
+                        )}
 
-                      {collab.is_for_sale && collab.product?.slug && (
-                        <Link
-                          href={`/produk/${collab.product.slug}`}
-                          className="tracked mt-3 inline-flex items-center gap-2 text-xs underline hover:opacity-60"
+                        <div
+                          className={cn(
+                            "absolute left-0 top-0 flex items-center gap-1.5 px-3 py-1.5",
+                            isComingSoon
+                              ? "bg-[var(--color-gold)] text-[var(--color-ink)]"
+                              : "bg-[var(--color-ink)] text-[var(--color-paper)]"
+                          )}
                         >
-                          <ShoppingBag className="h-3 w-3" />
-                          Lihat Produk
-                        </Link>
-                      )}
-                    </div>
+                          {isComingSoon ? (
+                            <Clock className="h-3 w-3" />
+                          ) : (
+                            <Sparkles className="h-3 w-3" />
+                          )}
+                          <span className="tracked text-[10px]">
+                            {isComingSoon ? "Coming Soon" : "Selesai"}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="mt-4">
+                        <h3 className="font-display text-lg leading-snug">{collab.title}</h3>
+                        {collab.partner_name && (
+                          <p className="tracked mt-1 text-[10px] text-[var(--color-grey-500)]">
+                            bersama {collab.partner_name}
+                          </p>
+                        )}
+                        {collab.description && (
+                          <p className="mt-2 line-clamp-2 text-sm text-[var(--color-grey-500)]">
+                            {collab.description}
+                          </p>
+                        )}
+                      </div>
+                    </Link>
+
+                    {collab.is_for_sale && collab.product?.slug && (
+                      <Link
+                        href={`/produk/${collab.product.slug}`}
+                        className="tracked mt-3 inline-flex items-center gap-2 text-xs underline hover:opacity-60"
+                      >
+                        <ShoppingBag className="h-3 w-3" />
+                        Lihat Produk
+                      </Link>
+                    )}
                   </div>
                 );
               })}

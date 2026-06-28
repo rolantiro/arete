@@ -16,3 +16,16 @@ export async function getCollaborations(): Promise<Collaboration[]> {
   }
   return (data ?? []) as Collaboration[];
 }
+
+export async function getCollaborationBySlug(slug: string): Promise<Collaboration | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("collaborations")
+    .select("*, product:products(*)")
+    .eq("slug", slug)
+    .eq("is_published", true)
+    .single();
+
+  if (error || !data) return null;
+  return data as Collaboration;
+}

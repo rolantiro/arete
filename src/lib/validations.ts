@@ -82,6 +82,14 @@ export const collaborationSchema = z.object({
   is_for_sale: z.boolean().default(false),
   product_id: z.string().uuid().nullable().optional(),
   partner_name: z.string().nullable().optional(),
+  instagram_url: z
+    .string()
+    .trim()
+    .refine((v) => v === "" || /^https?:\/\/.+/i.test(v), {
+      message: "Link Instagram harus berupa URL yang valid (diawali http:// atau https://)",
+    })
+    .nullable()
+    .optional(),
   sort_order: z.coerce.number().int().default(0),
   is_published: z.boolean().default(true),
 });

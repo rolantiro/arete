@@ -26,6 +26,7 @@ type FormValues = {
   is_for_sale: boolean;
   product_id: string | null;
   partner_name: string;
+  instagram_url: string;
   is_published: boolean;
 };
 
@@ -46,6 +47,7 @@ export function CollaborationForm({ initial }: { initial?: Collaboration }) {
     is_for_sale: initial?.is_for_sale ?? false,
     product_id: initial?.product_id ?? null,
     partner_name: initial?.partner_name ?? "",
+    instagram_url: initial?.instagram_url ?? "",
     is_published: initial?.is_published ?? true,
   });
 
@@ -81,6 +83,7 @@ export function CollaborationForm({ initial }: { initial?: Collaboration }) {
         body: JSON.stringify({
           ...values,
           partner_name: values.partner_name || null,
+          instagram_url: values.instagram_url.trim() || null,
           product_id: values.is_for_sale ? values.product_id : null,
         }),
       });
@@ -146,6 +149,14 @@ export function CollaborationForm({ initial }: { initial?: Collaboration }) {
         placeholder="Misal: Nama brand atau event yang diajak kolaborasi"
         value={values.partner_name}
         onChange={(e) => update("partner_name", e.target.value)}
+      />
+
+      <Input
+        label="Link Instagram (opsional)"
+        type="url"
+        placeholder="https://www.instagram.com/p/..."
+        value={values.instagram_url}
+        onChange={(e) => update("instagram_url", e.target.value)}
       />
 
       <div className="flex flex-col gap-1.5">
