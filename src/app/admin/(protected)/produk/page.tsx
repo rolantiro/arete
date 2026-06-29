@@ -147,16 +147,23 @@ export default function AdminProductsPage() {
                       </span>
                     </td>
                     <td className="px-5 py-4">
-                      <span
-                        className={cn(
-                          "tracked px-2.5 py-1 text-[10px]",
-                          product.is_active
-                            ? "bg-[var(--color-grey-100)] text-[var(--color-ink)]"
-                            : "bg-[var(--color-error)]/10 text-[var(--color-error)]"
+                      <div className="flex flex-wrap gap-1.5">
+                        <span
+                          className={cn(
+                            "tracked px-2.5 py-1 text-[10px]",
+                            product.is_active
+                              ? "bg-[var(--color-grey-100)] text-[var(--color-ink)]"
+                              : "bg-[var(--color-error)]/10 text-[var(--color-error)]"
+                          )}
+                        >
+                          {product.is_active ? "Aktif" : "Nonaktif"}
+                        </span>
+                        {product.is_sold && (
+                          <span className="tracked bg-[var(--color-ink)] px-2.5 py-1 text-[10px] text-[var(--color-paper)]">
+                            Sold
+                          </span>
                         )}
-                      >
-                        {product.is_active ? "Aktif" : "Nonaktif"}
-                      </span>
+                      </div>
                     </td>
                     <td className="px-5 py-4 text-right">
                       <div className="flex items-center justify-end gap-3">

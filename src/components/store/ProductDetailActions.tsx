@@ -24,9 +24,10 @@ export function ProductDetailActions({
   const toggleWishlistCount = useCounterStore((s) => s.toggleWishlist);
 
   const outOfStock = !product.is_preorder && product.stock <= 0;
+  const cannotBuy = product.is_sold || outOfStock;
 
   async function handleAddToCart() {
-    if (outOfStock) return;
+    if (cannotBuy) return;
     setLoadingCart(true);
     try {
       const res = await fetch("/api/cart", {
@@ -135,7 +136,7 @@ export function ProductDetailActions({
       <div className="flex gap-3">
         <button
           onClick={handleAddToCart}
-          disabled={loadingCart || outOfStock}
+          disabled={loadingCart || cannotBuy}
           className="tracked flex flex-1 items-center justify-center gap-2 bg-[var(--color-ink)] py-4 text-xs text-[var(--color-paper)] transition-opacity hover:opacity-90 disabled:opacity-50"
         >
           {loadingCart ? (
@@ -143,11 +144,13 @@ export function ProductDetailActions({
           ) : (
             <ShoppingBag className="h-4 w-4" strokeWidth={1.5} />
           )}
-          {outOfStock
-            ? "Stok Habis"
-            : product.is_preorder
-              ? "Pre-Order Sekarang"
-              : "Tambah ke Keranjang"}
+          {product.is_sold
+            ? "Sold"
+            : outOfStock
+              ? "Stok Habis"
+              : product.is_preorder
+                ? "Pre-Order Sekarang"
+                : "Tambah ke Keranjang"}
         </button>
         <button
           onClick={handleWishlist}

@@ -23,6 +23,7 @@ export const productSchema = z.object({
   is_featured: z.boolean().default(false),
   is_active: z.boolean().default(true),
   is_preorder: z.boolean().default(false),
+  is_sold: z.boolean().default(false),
   preorder_days: z.coerce
     .number()
     .int()

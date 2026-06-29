@@ -36,6 +36,7 @@ export type Product = {
   is_active: boolean;
   is_preorder: boolean;
   preorder_days: number | null;
+  is_sold: boolean;
   created_at: string;
   updated_at: string;
   // Populated via join when fetched with category info

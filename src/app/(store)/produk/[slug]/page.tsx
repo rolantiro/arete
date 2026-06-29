@@ -85,7 +85,13 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
                 {product.description}
               </p>
 
-              {product.is_preorder ? (
+              {product.is_sold ? (
+                <div className="mt-4 inline-flex items-center gap-2 border border-[var(--color-ink)] bg-[var(--color-grey-100)] px-4 py-2.5">
+                  <span className="tracked text-xs text-[var(--color-ink)]">
+                    Produk ini sudah terjual — ditampilkan sebagai arsip koleksi
+                  </span>
+                </div>
+              ) : product.is_preorder ? (
                 <div className="mt-4 inline-flex items-center gap-2 border border-[var(--color-gold)] bg-[var(--color-gold)]/10 px-4 py-2.5">
                   <span className="tracked text-xs text-[var(--color-ink)]">
                     Pre-Order — estimasi pengiriman {product.preorder_days ?? "beberapa"}{" "}

@@ -25,6 +25,7 @@ type ProductFormValues = {
   is_active: boolean;
   is_preorder: boolean;
   preorder_days: number | null;
+  is_sold: boolean;
 };
 
 function slugify(text: string) {
@@ -65,6 +66,7 @@ export function ProductForm({
     is_active: initialProduct?.is_active ?? true,
     is_preorder: initialProduct?.is_preorder ?? false,
     preorder_days: initialProduct?.preorder_days ?? null,
+    is_sold: initialProduct?.is_sold ?? false,
   });
 
   function update<K extends keyof ProductFormValues>(key: K, value: ProductFormValues[K]) {
@@ -242,6 +244,23 @@ export function ProductForm({
           />
           Aktif (tampil di toko)
         </label>
+      </div>
+
+      <div className="border border-[var(--color-grey-300)] p-5">
+        <label className="flex items-center gap-2.5 text-sm">
+          <input
+            type="checkbox"
+            checked={values.is_sold}
+            onChange={(e) => update("is_sold", e.target.checked)}
+            className="h-4 w-4 accent-[var(--color-ink)]"
+          />
+          Tandai sebagai Sold (Terjual)
+        </label>
+        <p className="mt-2 text-xs text-[var(--color-grey-500)]">
+          Produk tetap tampil di katalog sebagai arsip koleksi, tapi tombol beli
+          dinonaktifkan dan diberi label &ldquo;Sold&rdquo;. Berbeda dari stok
+          habis — status ini tidak hilang otomatis jika Anda menambah stok lagi.
+        </p>
       </div>
 
       <div className="border border-[var(--color-grey-300)] p-5">

@@ -24,7 +24,11 @@ export function ProductCard({ product, initialWishlisted = false }: ProductCardP
   const cover = product.images?.[0];
   // A pre-order product can be added to cart even with zero stock —
   // the whole point of pre-order is selling before stock exists.
+  // A sold product can never be purchased, regardless of stock or
+  // pre-order status — it's a deliberate archival flag, not a
+  // stock count.
   const outOfStock = !product.is_preorder && product.stock <= 0;
+  const cannotBuy = product.is_sold || outOfStock;
   const onSale =
     product.compare_at_price && product.compare_at_price > product.price;
 
@@ -52,7 +56,7 @@ export function ProductCard({ product, initialWishlisted = false }: ProductCardP
   async function handleAddToCart(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
-    if (outOfStock) return;
+    if (cannotBuy) return;
     setLoadingCart(true);
     try {
       const res = await fetch("/api/cart", {
@@ -93,24 +97,32 @@ export function ProductCard({ product, initialWishlisted = false }: ProductCardP
             </div>
           )}
 
-          {outOfStock && (
+          {product.is_sold ? (
             <div className="absolute left-0 top-0 bg-[var(--color-ink)] px-3 py-1.5">
-              <span className="tracked text-[10px] text-[var(--color-paper)]">
-                Stok Habis
-              </span>
+              <span className="tracked text-[10px] text-[var(--color-paper)]">Sold</span>
             </div>
-          )}
-          {product.is_preorder && (
-            <div className="absolute left-0 top-0 bg-[var(--color-gold)] px-3 py-1.5">
-              <span className="tracked text-[10px] text-[var(--color-ink)]">
-                Pre-Order{product.preorder_days ? ` · ${product.preorder_days} Hari` : ""}
-              </span>
-            </div>
-          )}
-          {!outOfStock && !product.is_preorder && onSale && (
-            <div className="absolute left-0 top-0 bg-[var(--color-gold)] px-3 py-1.5">
-              <span className="tracked text-[10px] text-[var(--color-ink)]">Diskon</span>
-            </div>
+          ) : (
+            <>
+              {outOfStock && (
+                <div className="absolute left-0 top-0 bg-[var(--color-ink)] px-3 py-1.5">
+                  <span className="tracked text-[10px] text-[var(--color-paper)]">
+                    Stok Habis
+                  </span>
+                </div>
+              )}
+              {product.is_preorder && (
+                <div className="absolute left-0 top-0 bg-[var(--color-gold)] px-3 py-1.5">
+                  <span className="tracked text-[10px] text-[var(--color-ink)]">
+                    Pre-Order{product.preorder_days ? ` · ${product.preorder_days} Hari` : ""}
+                  </span>
+                </div>
+              )}
+              {!outOfStock && !product.is_preorder && onSale && (
+                <div className="absolute left-0 top-0 bg-[var(--color-gold)] px-3 py-1.5">
+                  <span className="tracked text-[10px] text-[var(--color-ink)]">Diskon</span>
+                </div>
+              )}
+            </>
           )}
 
           <button
@@ -132,7 +144,7 @@ export function ProductCard({ product, initialWishlisted = false }: ProductCardP
           <div className="absolute inset-x-0 bottom-0 translate-y-full p-3 transition-transform duration-300 ease-[var(--ease-premium)] group-hover:translate-y-0">
             <button
               onClick={handleAddToCart}
-              disabled={loadingCart || outOfStock}
+              disabled={loadingCart || cannotBuy}
               className="tracked flex w-full items-center justify-center gap-2 bg-[var(--color-ink)] py-3 text-[11px] text-[var(--color-paper)] transition-opacity hover:opacity-90 disabled:opacity-50"
             >
               {loadingCart ? (
@@ -140,11 +152,13 @@ export function ProductCard({ product, initialWishlisted = false }: ProductCardP
               ) : (
                 <ShoppingBag className="h-3.5 w-3.5" strokeWidth={1.5} />
               )}
-              {outOfStock
-                ? "Stok Habis"
-                : product.is_preorder
-                  ? "Pre-Order Sekarang"
-                  : "Tambah ke Keranjang"}
+              {product.is_sold
+                ? "Sold"
+                : outOfStock
+                  ? "Stok Habis"
+                  : product.is_preorder
+                    ? "Pre-Order Sekarang"
+                    : "Tambah ke Keranjang"}
             </button>
           </div>
         </div>
